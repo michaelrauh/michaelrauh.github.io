@@ -125,9 +125,9 @@ func fizzbuzz(x: Int) -> Int {
 }
 ```
 Here is the resulting graph for the first 100 points:
-![fizzbuzz graph]({{ "/assets/fizzbuzz_graph.png" | absolute_url }})
+![fizzbuzz graph]({{ "../assets/fizzbuzz_graph.png" }})
 
-The point of this is that this is a different sort of branching than side-effect driven branching. Here is another way to implement this function:
+The point here is that this is a different sort of branching than side-effect driven branching. Here is another way to implement this function:
 ```swift
 func fizz(x: Int) -> String? {
     if (x % 3 == 0) {
