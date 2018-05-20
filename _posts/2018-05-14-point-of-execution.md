@@ -227,7 +227,11 @@ func doThingTwo() {
   println("The second button must have been tapped")
 }
 ```
-This strategy can be applied recursively until there is no branching anywhere in the code. That concludes this blog post.
+This strategy can be applied recursively until there is no branching anywhere in the code. You'll end up "unzipping" the program like so:
+
+![unzipping schematic]({{ "https://michaelrauh.github.io/assets/unzipping.png" }})
+
+That concludes this blog post.
 
 But what about serial data, you ask?
 
@@ -290,7 +294,9 @@ class Router {
 ```
 So we have replaced one class with a complexity of 2, with two classes, with a complexity of 1 and 2. Complexity has gone up. Is this better?
 Yes. Now, adding functionality to the app is a matter of adjusting routing. Routing can be done either through adding callbacks directly, parsing
-user input in a router, or by parsing service responses in a router. A single controller may have many routers, but it should not have any internal branching.
+user input in a router, or by parsing service responses in a router. A single controller may have many routers, but it should not have any internal branching. Here is a basic schematic:
+
+![router schematic]({{ "https://michaelrauh.github.io/assets/router.png" }})
 
 ## What if I am deep in legacy code?
 1. If you can't go all the way with it, do this to just a section of the code. Start in a controller and call it a day. Any branching that takes place outside of a router should be split up until it ends up in a controller callback or a router that calls a controller callback
