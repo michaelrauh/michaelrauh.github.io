@@ -125,7 +125,7 @@ func fizzbuzz(x: Int) -> Int {
 }
 ```
 Here is the resulting graph for the first 100 points:
-![fizzbuzz graph]({{ "../assets/fizzbuzz_graph.png" }})
+![fizzbuzz graph]({{ "https://michaelrauh.github.io/assets/fizzbuzz_graph.png" }})
 
 The point here is that this is a different sort of branching than side-effect driven branching. Here is another way to implement this function:
 ```swift
