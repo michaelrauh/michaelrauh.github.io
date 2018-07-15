@@ -1,5 +1,3 @@
-# My Broken Sugar Bowl is Not a Window
-
 # In the Pragmatic Programmer
 There is a concept of the broken window theory (as applied to software). It makes the statement that, if your code is mostly clean, then any imperfections in the code will stick out, and will be more likely to be fixed. This essentially boils down to the idea that codebases that are really bad seem beyond fixing, so people don't bother. Two obvious points:
 
