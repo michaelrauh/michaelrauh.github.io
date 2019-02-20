@@ -9,7 +9,7 @@ categories: jekyll update
 Similar to the dreaded `if` statement, people tend to write a lot of loops in their software. This is not necessarily seen as a bad practice. Some draw the line at nested loops, others just don't like to see loops that go on too long. In this post, I am going to argue that most loops are evil. I am focusing on `for` loops here, as I am assuming that `while` loops are a known evil.
 
 # What is a `for` loop?
-I am assuming that we all know what a `for` loop is. That said, there are some aspects that I bear pointing out. Loops all have some things in common. They all have:
+I am assuming that we all know what a `for` loop is. That said, there are some aspects that bear pointing out. Loops all have some things in common. They all have:
 1. An iterable - the thing that is being looped over
 1. Some form of index, pointer, or iterator that will keep our place
 
