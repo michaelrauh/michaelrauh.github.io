@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "A Few Patterns for Callbackers"
+title:  "A Few Patterns for Callbacks"
 date:   2019-04-21 08:59:30 -0400
 categories: jekyll update
 ---
