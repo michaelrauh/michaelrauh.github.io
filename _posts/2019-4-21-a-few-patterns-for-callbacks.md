@@ -25,7 +25,9 @@ class Callback {
     }
 
     void doCallback() {
+        doer.doIt("before")
         callbacker.doThing();
+        doer.doIt("after")
     }
 }
 
@@ -45,9 +47,9 @@ class Callbacker {
 }
 
 class Doer {
-    public int doIt(String ignored) {
-        return 5;
-    }
+  void doIt(String message) {
+      Log.i("DOER", "running code: " + message);
+  }
 }
 ```
 This code demonstrates several antipatterns in making callbacks. We can make several enhancements to the code without completely overhauling it.
@@ -66,13 +68,15 @@ class Callback {
     @Inject
     public Callback() {}
 
-    void bind(Callbacker callbacker, Doer doer) {
+    void bind(Callbacker callbacker) {
         this.callbacker = callbacker;
         this.doer = doer;
     }
 
     void doCallback() {
-        callbacker.doThing();
+      doer.doIt("before")
+      callbacker.doThing();
+      doer.doIt("after")
     }
 }
 
@@ -97,8 +101,8 @@ class Doer {
     @Inject
     public Doer() {}
 
-    int doIt(String ignored) {
-        return 5;
+    void doIt(String message) {
+        Log.i("DOER", "running code: " + message);
     }
 }
 ```
@@ -116,7 +120,9 @@ class Callback {
     }
 
     void doCallback() {
-        callbacker.doThing();
+      doer.doIt("before")
+      callbacker.doThing();
+      doer.doIt("after")
     }
 }
 
@@ -154,13 +160,13 @@ class Doer {
     @Inject
     public Doer() {}
 
-    int doIt(String ignored) {
-        return 5;
+    void doIt(String message) {
+        Log.i("DOER", "running code: " + message);
     }
 }
 ```
 
-That is, factory. Making a factory allows for partial binding. Since the callback is temporally bound (temporal binding is evil but sometimes unavoidable), it can't be supplied through dagger. That doesn't mean that the entire component must be carved out, though. Doer can still be supplied and bound at build time, then mixed in to the callback at create time. Now the biggest remaining issue is that, when we look inside of `Callbacker`, we have no idea that `doThing` is a callback method. We see a function that seems to just be sitting there, unused. To make it more clear that this function is called as a result of some event that is not under its control, it is better to put this method behind an interface. Now a casual glance shows the override annotation in the class. Another advantage to this is that this callback can then be replaced without too much trouble. Additionally, if there are many callbacks with the same pattern, a container could be made to hold a collection of the interface types. Most importantly, it hides any information that is not necessary to the callback. This ends up looking like below:
+That is, factory. Making a factory allows for partial binding. Since the callback is temporally bound (temporal binding is evil but sometimes unavoidable), it can't be supplied through dagger without calling bind in the dagger module. That doesn't mean that the entire component must be carved out, though. Doer can still be supplied and bound at build time, then mixed in to the callback at create time. Now the biggest remaining issue is that, when we look inside of `Callbacker`, we have no idea that `doThing` is a callback method. We see a method that seems to just be sitting there, unused. To make it more clear that this method is called as a result of some event that is not under its control, it is better to put this method behind an interface. Now a casual glance shows the override annotation in the class. Another advantage to this is that this callback can then be replaced without too much trouble. Additionally, if there are many callbacks with the same pattern, a container could be made to hold a collection of the interface types. Most importantly, it hides any information that is not necessary to the callback. This ends up looking like below:
 
 ```
 class Callback {
@@ -174,7 +180,9 @@ class Callback {
     }
 
     void doCallback() {
+        doer.doIt("before")
         doesThing.doThing();
+        doer.doIt("after")
     }
 }
 
@@ -199,7 +207,6 @@ class Callbacker implements DoesThing {
     @Inject
     public Callbacker(CallbackFactory callbackFactory) {
         this.callback = callbackFactory.create(this);
-
     }
 
     @Override
@@ -217,8 +224,8 @@ class Doer {
     @Inject
     public Doer() {}
 
-    int doIt(String ignored) {
-        return 5;
+    void doIt(String message) {
+        Log.i("DOER", "running code: " + message);
     }
 }
 ```
