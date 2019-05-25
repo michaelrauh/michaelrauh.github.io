@@ -5,8 +5,8 @@ date:   2019-04-21 08:59:30 -0400
 categories: jekyll update
 ---
 
-# Callbackers
-Event driven systems tend to use either plain callbackers, or some abstraction on callbackers (such as data-binding or promises). For the sake of this post, I am thinking of plain callbackers, as are popular in Android pre-data-binding.
+# Callbacks
+Event driven systems tend to use either plain callbacks, or some abstraction on callbacks (such as data-binding or promises). For the sake of this post, I am thinking of plain callbacks, as are popular in Android pre-data-binding.
 
 # A Rough Example
 
@@ -42,7 +42,7 @@ class Callback {
     }
 
     void doThing() {
-        Log.i("CALLBACKER", "made it");
+        Log.i("CALLBACK", "made it");
     }
 }
 
@@ -52,7 +52,7 @@ class Doer {
   }
 }
 ```
-This code demonstrates several antipatterns in making callbackers. We can make several enhancements to the code without completely overhauling it.
+This code demonstrates several antipatterns in making callbacks. We can make several enhancements to the code without completely overhauling it.
 
 ## Enhancements
 
@@ -92,7 +92,7 @@ class Callback {
     }
 
     void doThing() {
-        Log.i("CALLBACKER", "made it");
+        Log.i("CALLBACK", "made it");
     }
 }
 
@@ -106,7 +106,7 @@ class Doer {
     }
 }
 ```
-The next demerit of this code is the fact that `bind` must be called before the callbacker occurs, or else an exception will occur. This can be fixed by binding inside the constructor, but using dagger for this introduces a circular dependency. The fix here is to not use dagger for that particular field, but to use it for any other fields. I think you see where I am going. I am going to have to say the F-word.
+The next demerit of this code is the fact that `bind` must be called before the callback occurs, or else an exception will occur. This can be fixed by binding inside the constructor, but using dagger for this introduces a circular dependency. The fix here is to not use dagger for that particular field, but to use it for any other fields. I think you see where I am going. I am going to have to say the F-word.
 
 ```
 class Callbacker {
@@ -151,7 +151,7 @@ class Callback {
     }
 
     void doThing() {
-        Log.i("CALLBACKER", "made it");
+        Log.i("CALLBACK", "made it");
     }
 }
 
@@ -166,7 +166,7 @@ class Doer {
 }
 ```
 
-That is, factory. Making a factory allows for partial binding. Since the callbacker is temporally bound (temporal binding is evil but sometimes unavoidable), it can't be supplied through dagger without calling bind in the dagger module. That doesn't mean that the entire component must be carved out, though. Doer can still be supplied and bound at build time, then mixed in to the callbacker at create time. Now the biggest remaining issue is that, when we look inside of `Callback`, we have no idea that `doThing` is a callbacker method. We see a method that seems to just be sitting there, unused. To make it more clear that this method is called as a result of some event that is not under its control, it is better to put this method behind an interface. Now a casual glance shows the override annotation in the class. Another advantage to this is that this callbacker can then be replaced without too much trouble. Additionally, if there are many callbackers with the same pattern, a container could be made to hold a collection of the interface types. Most importantly, it hides any information that is not necessary to the callbacker. This ends up looking like below:
+That is, factory. Making a factory allows for partial binding. Since the callback is temporally bound (temporal binding is evil but sometimes unavoidable), it can't be supplied through dagger without calling bind in the dagger module. That doesn't mean that the entire component must be carved out, though. Doer can still be supplied and bound at build time, then mixed in to the callback at create time. Now the biggest remaining issue is that, when we look inside of `Callback`, we have no idea that `doThing` is a callback method. We see a method that seems to just be sitting there, unused. To make it more clear that this method is called as a result of some event that is not under its control, it is better to put this method behind an interface. Now a casual glance shows the override annotation in the class. Another advantage to this is that this callback can then be replaced without too much trouble. Additionally, if there are many callbacks with the same pattern, a container could be made to hold a collection of the interface types. Most importantly, it hides any information that is not necessary to the callback. This ends up looking like below:
 
 ```
 class Callbacker {
@@ -211,7 +211,7 @@ class Callback implements DoesThing {
 
     @Override
     public void doThing() {
-        Log.i("CALLBACKER", "made it");
+        Log.i("CALLBACK", "made it");
     }
 }
 
