@@ -1,44 +1,44 @@
 ---
 layout: post
-title:  "A Few Patterns for Callbacks"
+title:  "A Few Patterns for Callbackers"
 date:   2019-04-21 08:59:30 -0400
 categories: jekyll update
 ---
 
-# Callbacks
-Event driven systems tend to use either plain callbacks, or some abstraction on callbacks (such as data-binding or promises). For the sake of this post, I am thinking of plain callbacks, as are popular in Android pre-data-binding.
+# Callbackers
+Event driven systems tend to use either plain callbackers, or some abstraction on callbackers (such as data-binding or promises). For the sake of this post, I am thinking of plain callbackers, as are popular in Android pre-data-binding.
 
 # A Rough Example
 
 ```
-class Callback {
+class Callbacker {
 
-    private Callbacker callbacker;
+    private Callback callback;
     private Doer doer;
 
-    public Callback() {
+    public Callbacker() {
       doer = new Doer();
     }
 
-    void bind(Callbacker callbacker) {
-        this.callbacker = callbacker;
+    void bind(Callback callback) {
+        this.callback = callback;
     }
 
-    void doCallback() {
+    void doCallbacker() {
         doer.doIt("before")
-        callbacker.doThing();
+        callback.doThing();
         doer.doIt("after")
     }
 }
 
-class Callbacker {
+class Callback {
 
-    private Callback callback;
+    private Callbacker callbacker;
 
-    public Callbacker() {
-        callback = new Callback();
+    public Callback() {
+        callbacker = new Callbacker();
 
-        callback.bind(this);
+        callbacker.bind(this);
     }
 
     void doThing() {
@@ -52,7 +52,7 @@ class Doer {
   }
 }
 ```
-This code demonstrates several antipatterns in making callbacks. We can make several enhancements to the code without completely overhauling it.
+This code demonstrates several antipatterns in making callbackers. We can make several enhancements to the code without completely overhauling it.
 
 ## Enhancements
 
@@ -60,93 +60,93 @@ This code demonstrates several antipatterns in making callbacks. We can make sev
 The first issue with the example is that there is no dependency injection. This is better:
 
 ```
-class Callback {
-
-    private Callbacker callbacker;
-    private Doer doer;
-
-    @Inject
-    public Callback() {}
-
-    void bind(Callbacker callbacker) {
-        this.callbacker = callbacker;
-        this.doer = doer;
-    }
-
-    void doCallback() {
-      doer.doIt("before")
-      callbacker.doThing();
-      doer.doIt("after")
-    }
-}
-
 class Callbacker {
 
     private Callback callback;
+    private Doer doer;
 
     @Inject
-    public Callbacker(Callback callback) {
+    public Callbacker() {}
+
+    void bind(Callback callback) {
         this.callback = callback;
-
-        callback.bind(this);
-    }
-
-    void doThing() {
-        Log.i("CALLBACKER", "made it");
-    }
-}
-
-class Doer {
-
-    @Inject
-    public Doer() {}
-
-    void doIt(String message) {
-        Log.i("DOER", "running code: " + message);
-    }
-}
-```
-The next demerit of this code is the fact that `bind` must be called before the callback occurs, or else an exception will occur. This can be fixed by binding inside the constructor, but using dagger for this introduces a circular dependency. The fix here is to not use dagger for that particular field, but to use it for any other fields. I think you see where I am going. I am going to have to say the F-word.
-
-```
-class Callback {
-
-    private Callbacker callbacker;
-    private Doer doer;
-
-    public Callback(Callbacker callbacker, Doer doer) {
-        this.callbacker = callbacker;
         this.doer = doer;
     }
 
-    void doCallback() {
+    void doCallbacker() {
       doer.doIt("before")
-      callbacker.doThing();
+      callback.doThing();
       doer.doIt("after")
     }
 }
 
-class CallbackFactory {
+class Callback {
+
+    private Callbacker callbacker;
+
+    @Inject
+    public Callback(Callbacker callbacker) {
+        this.callbacker = callbacker;
+
+        callbacker.bind(this);
+    }
+
+    void doThing() {
+        Log.i("CALLBACKER", "made it");
+    }
+}
+
+class Doer {
+
+    @Inject
+    public Doer() {}
+
+    void doIt(String message) {
+        Log.i("DOER", "running code: " + message);
+    }
+}
+```
+The next demerit of this code is the fact that `bind` must be called before the callbacker occurs, or else an exception will occur. This can be fixed by binding inside the constructor, but using dagger for this introduces a circular dependency. The fix here is to not use dagger for that particular field, but to use it for any other fields. I think you see where I am going. I am going to have to say the F-word.
+
+```
+class Callbacker {
+
+    private Callback callback;
+    private Doer doer;
+
+    public Callbacker(Callback callback, Doer doer) {
+        this.callback = callback;
+        this.doer = doer;
+    }
+
+    void doCallbacker() {
+      doer.doIt("before")
+      callback.doThing();
+      doer.doIt("after")
+    }
+}
+
+class CallbackerFactory {
 
     private Doer doer;
 
     @Inject
-    public CallbackFactory(Doer doer) {
+    public CallbackerFactory(Doer doer) {
         this.doer = doer;
     }
 
-    public Callback create(Callbacker callbacker) {
-        return new Callback(callbacker, doer);
+    public Callbacker create(Callback callback) {
+        return new Callbacker(callback, doer);
     }
 }
 
-class Callbacker {
+class Callback {
 
-    private Callback callback;
+    private Callbacker callbacker;
 
     @Inject
-    public Callbacker(CallbackFactory callbackFactory) {
-        this.callback = callbackFactory.create(this);
+    public Callback(CallbackerFactory callbackerFactory) {
+        this.callbacker = callbackerFactory.create(this);
 
     }
 
@@ -166,47 +166,47 @@ class Doer {
 }
 ```
 
-That is, factory. Making a factory allows for partial binding. Since the callback is temporally bound (temporal binding is evil but sometimes unavoidable), it can't be supplied through dagger without calling bind in the dagger module. That doesn't mean that the entire component must be carved out, though. Doer can still be supplied and bound at build time, then mixed in to the callback at create time. Now the biggest remaining issue is that, when we look inside of `Callbacker`, we have no idea that `doThing` is a callback method. We see a method that seems to just be sitting there, unused. To make it more clear that this method is called as a result of some event that is not under its control, it is better to put this method behind an interface. Now a casual glance shows the override annotation in the class. Another advantage to this is that this callback can then be replaced without too much trouble. Additionally, if there are many callbacks with the same pattern, a container could be made to hold a collection of the interface types. Most importantly, it hides any information that is not necessary to the callback. This ends up looking like below:
+That is, factory. Making a factory allows for partial binding. Since the callbacker is temporally bound (temporal binding is evil but sometimes unavoidable), it can't be supplied through dagger without calling bind in the dagger module. That doesn't mean that the entire component must be carved out, though. Doer can still be supplied and bound at build time, then mixed in to the callbacker at create time. Now the biggest remaining issue is that, when we look inside of `Callback`, we have no idea that `doThing` is a callbacker method. We see a method that seems to just be sitting there, unused. To make it more clear that this method is called as a result of some event that is not under its control, it is better to put this method behind an interface. Now a casual glance shows the override annotation in the class. Another advantage to this is that this callbacker can then be replaced without too much trouble. Additionally, if there are many callbackers with the same pattern, a container could be made to hold a collection of the interface types. Most importantly, it hides any information that is not necessary to the callbacker. This ends up looking like below:
 
 ```
-class Callback {
+class Callbacker {
 
     private DoesThing doesThing;
     private Doer doer;
 
-    public Callback(DoesThing doesThing, Doer doer) {
+    public Callbacker(DoesThing doesThing, Doer doer) {
         this.doesThing= doesThing;
         this.doer = doer;
     }
 
-    void doCallback() {
+    void doCallbacker() {
         doer.doIt("before")
         doesThing.doThing();
         doer.doIt("after")
     }
 }
 
-class CallbackFactory {
+class CallbackerFactory {
 
     private Doer doer;
 
     @Inject
-    public CallbackFactory(Doer doer) {
+    public CallbackerFactory(Doer doer) {
         this.doer = doer;
     }
 
-    public Callback create(DoesThing doesThing) {
-        return new Callback(doesThing, doer);
+    public Callbacker create(DoesThing doesThing) {
+        return new Callbacker(doesThing, doer);
     }
 }
 
-class Callbacker implements DoesThing {
+class Callback implements DoesThing {
 
-    private final Callback callback;
+    private final Callbacker callbacker;
 
     @Inject
-    public Callbacker(CallbackFactory callbackFactory) {
-        this.callback = callbackFactory.create(this);
+    public Callback(CallbackerFactory callbackerFactory) {
+        this.callbacker = callbackerFactory.create(this);
     }
 
     @Override
