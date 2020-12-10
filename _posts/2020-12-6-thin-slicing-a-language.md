@@ -107,7 +107,7 @@ To do this, we have two options:
 
 I went with option two this time. This was probably a bad choice but I like macros. 
 
-Below is the line of code that handles the identity function's semantics. This is taken out of context for simplicity, but the context will be there in the next block if that makes you nervous. "#'" is shorthand that generates a Racket syntax object. Macros in Racket take in syntax and produce syntax. This is useful because there is more to syntax then you see. There is a concept of source location and bindings. Some macro forms hide the "#'" behind still more macros, but that does not mean they are not there.
+Below is the line of code that handles the identity function's semantics. This is taken out of context for simplicity, but the context will be there in the next block if that makes you nervous. "#'" is shorthand that generates a Racket syntax object. Macros in Racket take in syntax and produce syntax. This is useful because there is more to syntax than you see. There is a concept of source location and bindings. Some macro forms hide the "#'" behind still more macros, but that does not mean they are not there.
 
 ```
 [(op x "identity") #'(identity x)]
