@@ -111,6 +111,7 @@ After this addition, the lexer looks like:
    ["\n" (token 'NEWLINE lexeme)]
    ["nl" (token 'DELIMITER lexeme)]
    ["|" (token 'PIPE lexeme)]
+   ["/" (token 'OP lexeme)]
    ["^" (token 'UPSCOPE lexeme)]
    ["v" (token 'DOWNSCOPE lexeme)]
    [digits (token 'INTEGER (string->number lexeme))]
