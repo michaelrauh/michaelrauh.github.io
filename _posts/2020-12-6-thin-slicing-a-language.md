@@ -185,7 +185,7 @@ It is tempting to write the simplest code that will produce the input/output pai
 
 Let me take a short cut to get the same result that we had before, and then we can talk about why this is a terrible idea.
 
-What if I didn't want to think about the fact that I can have multiple operations just yet, and also reasoned that I can just do the mapping inside of the `/` operation. So the syntax would imply that `/` works ons a stream of single numbers, but under the covers it can take the whole list in at once? We could devise something like this:
+What if I didn't want to think about the fact that I can have multiple operations just yet, and also reasoned that I can just do the mapping inside of the `/` operation? So the syntax would imply that `/` works on a stream of single numbers, but under the covers it can take the whole list in at once. We could devise something like this:
 
 ```
 
