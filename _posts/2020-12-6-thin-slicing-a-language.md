@@ -28,7 +28,7 @@ The reason I was not able to complete this in a timely fashion was because I did
 2. Warning signs for when you have gone off the rails and are trending toward spending eleven months on a twenty minute task.
 3. Another shout out to the best LOP book: [Beautiful Racket](https://beautifulracket.com). I would not have gotten anywhere without it. It is an inspiration, and everyone should buy it. (This is thing 3/2).
 
-## Case Study: Adding the "/" Built in Function to AOCLOP
+# Case Study: Adding the "/" Built in Function to AOCLOP
 
 First, let us start with a line of code from a made up tiny DSL. In this language, all programs are a single line of code. I named it aoclop (pronounced eyoo-clop) for mysterious reasons. This is a program that takes in a file which has a column of numbers in it, divides each of those numbers by three, and then prints out the whole list of numbers. This is the first part of the first prompt of AoC 2019.
 
@@ -66,7 +66,7 @@ This program will return out: `'(1 2 3)`
 
 For the sake of this post, I will assume that everything except for `/` is already there. I will now add `/` to make the example above work. 
 
-## Syntax
+# Syntax
 
 The first step is making it so that Racket is aware of `/` as a term. Since it falls between `|` characters it is already picked up as something that does something. This is a result of a bit of magic in the parser (written in [brag](https://docs.racket-lang.org/brag/)) which looks like:
 ```
@@ -124,7 +124,7 @@ into this: `(aoclop-program (read 1 (delimiter "nl")) (scope-block (all-ops (op 
 
 complete with all sorts of nice things like source location so that errors can be reported to the correct place in the code. Conveniently, the above string looks like a lisp s-expression. This makes it really easy to write macros and functions for. In the big picture, this is already code. It simply has no semantic bindings.
 
-## Semantics
+# Semantics
 
 Next, we have to imbue `/` with what it does. The previous action made it a word. Now we give it meaning.
 To do this, we have two options:
@@ -180,7 +180,7 @@ As a note on process, I did not just imagine all of this into existence. Typing 
 
 That is the whole slice! Now for the pitfall:
 
-## The One Big Pitfall
+# The One Big Pitfall
 It is tempting to write the simplest code that will produce the input/output pairs that you want. If you do that but make the wrong sort of shortcut to get there, you will regret it.
 
 Let me take a short cut to get the same result that we had before, and then we can talk about why this is a terrible idea.
@@ -226,17 +226,216 @@ Without the design phase it becomes necessary to make sure that your code is con
 
 Skipping this pitfall leaves you in a really good place. You now have a case statement that you can add more operators to. Each one only needs to be concerned with integers, as mapping is done for them. There is no explicit recursion in your macros. Future changes can be in the range of 4-5 lines of code at a time.
 
-## Takeaway
+# Takeaway
 Be very careful about implementation at every phase in order to assure syntactic and semantic consistency. Misses in the semantic mappings between source and target will only get worse over time.
 
-## Philosophical Rambling 
+# Philosophical Rambling 
 A DSL is defined by that which may be assumed. If your DSL grows into a General Purpose Language (GPL), it loses value. This concept is handled very well in [Domain-Specific Languages](https://martinfowler.com/books/dsl.html). DSLs increase your number of assumptions. Assumptions are things you don't have to think about. They also represent system inflexibility. The more system inflexibility you can introduce, the more flexibility you can achieve in the flexible bits, and the easier it is to add functionality. The issue is that you can get this wrong, and then you’re in a world of hurt. The fix to this is that you have to be very willing to throw away old code. Anything that does not map perfectly to what is desired from the standpoint of what was intended semantically to what is really there must be fixed early on or it will only get worse. Of course, this is a moving target as features are added.
 
-## Next Research Questions
+# Next Research Questions
 The next question to look at related to these ideas is in practical LOP. I think that these advanced tools make it practical to thin slice delivery of a language without a big up front design. The question is in whether doing so allows for the foresight to know when to split languages, and whether there is strong enough support for disparate language composition. Racket makes it easy to mix domain specific languages (see the above example with Brag) so the idea of writing a dozen tiny languages to fix one problem seems more tenable than one would imagine. The ideal for DSLs would be something that feels like changing tools while working on a carpentry project. In particular, there should be many, many languages that are so small that learning them and using them is effortless. It would be odd if people said they only did carpentry using saw, or only using lacquer. That does not even make sense. In practice, there is a general purpose tool (hand) which drives switching of small, highly specialized tools. This is the ideal that software development should aspire to. The two specific questions become:
 1. Can LOP be done quickly without an up front design? I am sure it can be done, but am not sure about how long it will take.
 1. Is the judgement required to decide when to continue expanding a DSL vs. starting a new one beyond what people are capable of?
 1. What language should be used to glue DSLs together? Another DSL, or the implementation language of the DSLs (this is question 3/2)?
 
-## Next Steps
+# Next Steps
 I am planning to keep working on [aoclop](https://github.com/michaelrauh/aoclop) even though it is way over budget and over schedule. If you would like to help, or even just want to talk about it, please let me know! There is a lot that did not make it in to this post.
+
+## Appendix
+Getting from the above slice to an answer for AoC19 is only a few minutes of work.
+
+# AOC 1.1 Answer
+
+The target language work ends up being:
+
+```
+#lang aoclop
+read: 1 nl | v | / 3 | floor | - 2 | ^ | sum
+```
+
+Which is enabled by the grammar:
+
+```
+#lang brag
+aoclop-program : /NEWLINE read scope-block /PIPE collect /NEWLINE
+read           : /READ INTEGER delimiter
+scope-block    : /PIPE /DOWNSCOPE /PIPE all-ops /PIPE /UPSCOPE
+delimiter      : DELIMITER
+all-ops        : op*
+op             : OP | OP INTEGER | OP /PIPE | OP INTEGER /PIPE
+collect        : COLLECT
+```
+
+The lexer responds in the same pattern:
+
+```
+(define aoclop-lexer
+  (lexer-srcloc
+   ["read:" (token 'READ lexeme)]
+   ["\n" (token 'NEWLINE lexeme)]
+   ["nl" (token 'DELIMITER lexeme)]
+   ["floor" (token 'OP lexeme)]
+   ["identity" (token 'OP lexeme)]
+   ["|" (token 'PIPE lexeme)]
+   ["/" (token 'OP lexeme)]
+   ["-" (token 'OP lexeme)]
+   ["floor" (token 'OP lexeme)]
+   ["sum" (token 'COLLECT lexeme)]
+   ["^" (token 'UPSCOPE lexeme)]
+   ["v" (token 'DOWNSCOPE lexeme)]
+   [digits (token 'INTEGER (string->number lexeme))]
+   [whitespace (token lexeme #:skip? #t)]))
+(provide aoclop-lexer)
+```
+
+And then the expander has only to take into account these small changes:
+
+```
+(define-syntax-rule (aoclop-program read-expr (scope-block (all-ops op ...)) collect) (apply collect (map (λ~> op ...) read-expr)))
+
+(define-syntax (op stx)
+  (syntax-case stx ()
+    [(op x "identity") #'(identity x)]
+    [(op x "floor") #'(floor x)]
+    [(op x "/" divisor) #'(/ x divisor)]
+    [(op x "-" difference) #'(- x difference)]))
+(provide op)
+
+(define-syntax-rule (collect "sum") +)
+(provide collect)
+```
+
+And that is it! The biggest operative change is that the programs no longer return lists. They return a single number that has been collected from a list using some sort of folding operation (in this example sum or +). 
+
+Most gratifying is that getting from `1.1` to `1.2` is even less change. 
+
+# AoC 1.2 Answer
+
+For 1.2, the same task is ascribed except everything inside the scope block is run until it bottoms out at zero, and all results are added up. Most readers would assume we would need some concept of recursion, which usually requires the ability to define functions. At least we should require the Y combinator. Because we have a layer of abstraction between our target language and our implementation, all notions of recursion or fixpoint calculation can be in the expander. As a result we can just define a syntax for convergance and go from there.
+
+```
+#lang aoclop
+read: 1 nl | v |> / 3 | floor | - 2 <| ^ | sum
+```
+
+Note the > < which means "do this until you stop" in this little language.
+
+To implement this, we need to parse it:
+
+```
+aoclop-program : /NEWLINE read scope-block /PIPE collect /NEWLINE
+read           : /READ INTEGER delimiter
+scope-block    : /PIPE /DOWNSCOPE /PIPE all-ops /PIPE /UPSCOPE | /PIPE /DOWNSCOPE /PIPE converge-block /PIPE /UPSCOPE
+delimiter      : DELIMITER
+all-ops        : op*
+converge-block : /GT all-ops /LT
+op             : OP | OP INTEGER | OP /PIPE | OP INTEGER /PIPE
+collect        : COLLECT
+```
+
+This just says we can replace a standard all-ops block with a converge block under scoping. This may be overspecific but it works for this use case. If we ever need to do convergence somewhere else we can move it later. That would not step into the one big pitfall because we are associating the semantics of convergence with the syntax of it. If that syntax moves, that is okay.
+
+The lexer is predictable: 
+```
+(define aoclop-lexer
+  (lexer-srcloc
+   ["read:" (token 'READ lexeme)]
+   ["\n" (token 'NEWLINE lexeme)]
+   ["nl" (token 'DELIMITER lexeme)]
+   ["floor" (token 'OP lexeme)]
+   ["identity" (token 'OP lexeme)]
+   ["|" (token 'PIPE lexeme)]
+   ["/" (token 'OP lexeme)]
+   ["-" (token 'OP lexeme)]
+   ["floor" (token 'OP lexeme)]
+   [">" (token 'GT lexeme)]
+   ["<" (token 'LT lexeme)]
+   ["sum" (token 'COLLECT lexeme)]
+   ["^" (token 'UPSCOPE lexeme)]
+   ["v" (token 'DOWNSCOPE lexeme)]
+   [digits (token 'INTEGER (string->number lexeme))]
+   [whitespace (token lexeme #:skip? #t)]))
+(provide aoclop-lexer)
+```
+
+And now the expander is the thing that has to be upgraded, but it is only a few lines added:
+```
+(define-syntax (aoclop-program stx)
+  (syntax-case stx ()
+    [(aoclop-program read-expr (scope-block (converge-block (all-ops op ...))) collect) #'(apply collect (map ((curry converge) (λ~> op ...)) read-expr))]
+    [(aoclop-program read-expr (scope-block (all-ops op ...)) collect) #'(apply collect (map (λ~> op ...) read-expr))]))
+(provide aoclop-program)
+
+(define (converge proc x)
+  (define step (proc x))
+  (cond [(<= step 0) 0]
+        [else (+ step (converge proc step))]))
+
+```
+
+The tricky parts here are `converge` and `curry`. `curry` is a built-in that allows me to pass one parameter at a time to a function. This is useful because `converge` takes two parameters, but the second one is going to be involved in a `map` operation. `map` takes a function of one parameter so I have to bind the `proc` to `converge` first. In this case the `proc` is `(λ~> op ...)` which represents the one-arity combination of all operations piped together. The remaining new functionality is `converge`. `converge` simply runs a `proc` to generate a `step` and if the `step` is zero it stops. It adds up all results. This is a little overspecialized but it works for this case. It is tempting to replace the hard-coded `0` with the identity of the folding operation, and pass in the folding operation instead of always using `+`. In practice `+` is the most common, with `*` being second most popular. If we used `*`, we would hope to bottom out at `1` but it may never reach that value. Some acceptable error threshold would then be useful. This is all discussed at length in the great book `SICP` linked above.
+
+Astute readers may notice that we could break the `aoclop-program` macro up. I agree and think this would be a good refactor to do before the next slice. It should be possible to have that macro rearrange the big pieces and then delegate to lower down macros for greater long term flexibility. This would look like:
+
+```
+
+(define (converge proc x)
+  (define step (proc x))
+  (cond [(<= step 0) 0]
+        [else (+ step (converge proc step))]))
+
+(define-syntax-rule (aoclop-program read scope-block collect)
+  (apply collect (read-scope scope-block read)))
+(provide aoclop-program)
+
+(define-syntax (read-scope stx)
+  (syntax-case stx ()
+    [(read-scope (scope-block (converge-block all-ops)) read) #'(map ((curry converge) all-ops) read)]
+    [(read-scope (scope-block all-ops) read) #'(map all-ops read)]))
+
+(define-syntax-rule (all-ops op ...)
+  (λ~> op ...))
+(provide all-ops)
+
+(define-syntax (op stx)
+  (syntax-case stx ()
+    [(op x "identity") #'(identity x)]
+    [(op x "floor") #'(floor x)]
+    [(op x "/" divisor) #'(/ x divisor)]
+    [(op x "-" difference) #'(- x difference)]))
+(provide op)
+
+(define-syntax-rule (collect "sum") +)
+(provide collect)
+
+(define-syntax-rule (delimiter "nl") "\n")
+(provide delimiter)
+
+```
+
+In my opinion this is slightly harder to understand as it is necessary to introduce an intermediate macro `read-scope` which does not appear in the grammar in order to give the mapping operation associated with the scope block visibility on the read data. It is more flexible for future changes as it localizes the concept of convergence into a smaller area, and more tightly defines all-ops as essentially equivalent to a threading lambda. As a last upgrade we could use more sophisticated macros in the form of `syntax-parse` to give better error messages to users of the DSL, or add in code coloring and the like.
+
+
+# Why You Should Care
+This is a very promising update as it took a very short amount of time and a tiny amount of code. It shows that lack of planning did not cause us to be in a bad place for part two. Instead, being disciplined and making sure the code was in a good place at each step left us in a flexible enough position to leap in any direction easily. 
+
+# Next Tactics
+To cover the last obvious question, we can look at the ease of composition of these languages. There is an issue where, if we want to go outside of what is allowed in the target language, we have no recourse but to extend the language syntax and semantics. This is dangerous, as bigger DSLs are less useful than small ones. Alternatively, you can start over. This is also suboptimal as it requires a DSL to be written for each slightly different problem. Ideally, subtasks can be done in multiple DSLs and they can be stitched together (much in the way brag is generally useful). Making this possible is less change than expected. Let's go back to the `(aoclop-program)` macro. Looking at this literally, whatever this macro produces is what you get at the end when you run any `#lang aoclop` script. Right now, it produces a number. Instead, it could expose a variable binding. For example:
+
+```
+(define-syntax-rule (aoclop-program read-expr (scope-block (all-ops op ...)))
+  (map (λ~> op ...) read-expr))
+(provide aoclop-program)
+```
+
+Becomes
+
+```
+(define-syntax-rule (aoclop-program read-expr (scope-block (all-ops op ...)))
+(begin
+  (define answer (map (λ~> op ...) read-expr))
+  answer)
+(provide aoclop-program)
+```
+
+And now I can either run the script or import the script into a Racket file and expect `answer` to be there.
