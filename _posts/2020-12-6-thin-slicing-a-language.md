@@ -7,7 +7,7 @@ categories: jekyll update
 
 ## Introduction
 
-I like [Language Oriented Programming](https://en.wikipedia.org/wiki/Language-oriented_programming) (LOP) a lot, but I am allergic to doing the dreaded big up front design. Pretty much all LOP and [Domain Specific Language](https://en.wikipedia.org/wiki/Domain-specific_language) (DSL) materials assume or recommend a design phase. 
+I like [Language Oriented Programming](https://en.wikipedia.org/wiki/Language-oriented_programming) (LOP) a lot, but I am allergic to doing the dreaded big up front design. Pretty much all LOP and [Domain Specific Language](https://en.wikipedia.org/wiki/Domain-specific_language) (DSL) materials assume or recommend a design phase.
 
 Last year, I set out to do LOP without any foresight beyond that required to design the code I would write that day. The challenge that I chose as my framework for this was [Advent of Code](https://adventofcode.com) (AoC) 2019. There were two rules to this challenge: 
 
@@ -26,7 +26,7 @@ A year later, I have made a lot of mistakes and have not managed to complete the
 The reason I was not able to complete this in a timely fashion was because I did not know about the major pitfall involved in this sort of task. In this post I will talk about two things:
 1. What a thin slice of a language feature can look like in the best of times.
 2. Warning signs for when you have gone off the rails and are trending toward spending eleven months on a twenty minute task.
-3. Another shout out to the best LOP book: [Beautiful Racket](https://beautifulracket.com). I would not have gotten anywhere without it. It is an inspiration, and everyone should buy it. (This is thing 3/2).
+3. Another shout out to the best LOP book: [Beautiful Racket](https://beautifulracket.com). I would not have gotten anywhere without it. It is an inspiration, and everyone should buy it. Its design phases are also very short, and it takes thin slices. In a lot of ways, this post is redundant to the book. It is only shorter and more focused on the idea of keeping design phases narrow. In the book, the design phases are narrow but the focus is on LOP techniques themselves. The true test of this post will be in later posts when further days of AoC are picked up and either produce something terrible or something good. (This is thing 3/2).
 
 # Case Study: Adding the "/" Built in Function to AOCLOP
 
