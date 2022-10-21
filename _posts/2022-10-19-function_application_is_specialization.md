@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Functional Application is Specialization"
+title:  "Function Application is Specialization"
 date:   2022-10-19 00:00:00 -0400
 categories: jekyll update
 ---
