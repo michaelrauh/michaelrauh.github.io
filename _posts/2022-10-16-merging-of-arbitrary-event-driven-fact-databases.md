@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Merging of Event Driven Fact Databases"
-date:   2022-10-21 00:00:00 -0400
+date:   2022-10-16 00:00:00 -0400
 categories: jekyll update
 ---
 

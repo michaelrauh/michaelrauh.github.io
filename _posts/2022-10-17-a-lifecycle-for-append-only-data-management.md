@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "A Lifecycle for Append Only Data Management"
-date:   2022-10-22 00:00:00 -0400
+date:   2022-10-17 00:00:00 -0400
 categories: jekyll update
 ---
 

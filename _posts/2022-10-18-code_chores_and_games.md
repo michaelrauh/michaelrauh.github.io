@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Code, Chores, and Games"
-date:   2022-10-23 00:00:00 -0400
+date:   2022-10-18 00:00:00 -0400
 categories: jekyll update
 ---
 
